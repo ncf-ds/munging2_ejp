@@ -1,0 +1,131 @@
+---
+title: "Temp"
+output: html_document
+---
+```{r}
+
+  require(data.table)
+  require(ggplot2)
+  require(doBy)
+  require(stringr)
+
+```
+
+
+```{r}
+
+  project.dir <- "/Users/erinc/Desktop/DataMunging/Projects/ClassProject2"
+  dataset.dir <- "/data"
+  
+  # when done working, you can save your workspace as:
+  # save.image(file = file.path(project.dir, dataset.dir, "image.RData"))
+  
+  # then, when you start working again, you can start back up with:
+  # load(file.path(project.dir, dataset.dir, "image.RData"))
+
+```
+
+#### Read the file 
+```{r, echo=FALSE}
+  
+  # first, download the original file from:
+  # https://data.cms.gov/Medicare/Inpatient-Prospective-Payment-System-IPPS-Provider/97k6-zzx3
+  
+  # read the file
+  top100.dt <- fread(
+                  file.path(project.dir, dataset.dir, "AmountChargedTop100Procedures.csv")
+                )
+  # get rid of spaces in names (we will improve them all later) - this is just to make the set workable.
+  setnames(top100.dt, names(top100.dt), gsub(" ", "", names(top100.dt)))
+  
+```
+
+#### Clean up
+
+##### DRG Description column
+
+Right now, there is a column called DRGDefinition where entries are of the form: "code - description"
+
+Here is an example: "039 - EXTRACRANIAL PROCEDURES W/O CC/MCC".
+
+We break this into two (factor) columns: drg.code and drg.description.
+
+```{r}
+  
+  # drg.code column:
+  top100.dt$drg.code <- factor(word(top100.dt$DRGDefinition, 1))
+  
+  # drg.description column:
+  top100.dt$drg.description <- factor(word(top100.dt$DRGDefinition, 3,-1))
+  
+  # get rid of redundant column:
+  top100.dt[, DRGDefinition := NULL]
+  
+```
+
+Change zip codes to factors. Add 0s at the beginning of zip codes where they were lost when stored as integers. (Yes, I tried reading them as factors in fread, the 0s were already gone.)
+
+```{r}
+
+  top100.dt[, ProviderZipCode := factor(
+                      paste0(
+                        ifelse(top100.dt$ProviderZipCode < 10000, "0", ""), 
+                        top100.dt$ProviderZipCode
+                      )
+                    )]
+  
+```
+
+Turn "money" columns into numbers without "$" signs:
+
+```{r}
+
+  names_numeric = c("AverageMedicarePayments", "AverageTotalPayments", "AverageCoveredCharges")
+  for(col in names_numeric) set(top100.dt, j=col, value=as.numeric(gsub("$", "", top100.dt[[col]], fixed = TRUE)))
+  
+```
+
+Turn character columns into factors where appropriate:
+
+```{r}
+  
+  names_factors = c("ProviderId", "ProviderName", "ProviderStreetAddress", "ProviderCity", "ProviderState", "HospitalReferralRegionDescription")
+  for (col in names_factors) set(top100.dt, j=col, value=as.factor(top100.dt[[col]]))
+  
+```
+
+
+Change column names:
+
+```{r}
+
+  setnames(
+    top100.dt, 
+    names(top100.dt), 
+    c("provider.id", "provider.name", "address", "city", "state", "zip", "region", "num.discharges", "covered.charges", "total.payments", "medicare.payments", "drg.code", "drg.description")
+  )
+  
+```
+
+Write a .csv:
+
+```{r}
+
+  write.csv(top100.dt, file = "Top100Procedures.csv", row.names = FALSE)
+  
+```
+
+
+```{r}
+
+  total.amount.paid <- summaryBy(total.payments ~ provider.id, data = top100.dt, FUN = c(length, sum))
+  
+  ggplot(
+    top100.dt,
+    aes(x=drg.code),
+    xlab = "Provider", 
+    ylab = "Average total payments"
+  ) + geom_bar( stat = "bin" )
+  
+```
+
