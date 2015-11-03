@@ -14,8 +14,8 @@ output: html_document
 
 ```{r}
 
-  project.dir <- "/Users/erinc/Desktop/DataMunging/Projects/ClassProject2"
-  dataset.dir <- "/data"
+  project.dir <- "."
+  dataset.dir <- file.path(project.dir,"data")
   
   # when done working, you can save your workspace as:
   # save.image(file = file.path(project.dir, dataset.dir, "image.RData"))
@@ -28,14 +28,9 @@ output: html_document
 #### Read the file 
 ```{r, echo=FALSE}
   
-  # first, download the original file from:
-  # https://data.cms.gov/Medicare/Inpatient-Prospective-Payment-System-IPPS-Provider/97k6-zzx3
-  
+  # first, download the original file:
   # read the file
-  top100.dt <- fread(
-                  file.path(project.dir, dataset.dir, "AmountChargedTop100Procedures.csv")
-                )
-  # get rid of spaces in names (we will improve them all later) - this is just to make the set workable.
+  top100.dt <- fread("https://data.cms.gov/api/views/97k6-zzx3/rows.csv?accessType=DOWNLOAD")
   setnames(top100.dt, names(top100.dt), gsub(" ", "", names(top100.dt)))
   
 ```
@@ -111,7 +106,7 @@ Write a .csv:
 
 ```{r}
 
-  write.csv(top100.dt, file = "Top100Procedures.csv", row.names = FALSE)
+  write.csv(top100.dt, file = file.path(dataset.dir,"Top100Procedures.csv"), row.names = FALSE)
   
 ```
 
