@@ -134,20 +134,18 @@ Write a .csv:
 
 ```{r}
 
-  write.csv(top100.dt, file = file.path(dataset.dir,"Top100Procedures.csv"), row.names = FALSE)
+  write.csv(top100.dt, file = "./data/Top100Procedures.csv", row.names = FALSE)
   
 ```
 
+To read the csv:
 
 ```{r}
 
-#  total.amount.paid <- summaryBy(total.payments ~ provider.id, data = top100.dt, FUN = c(length, sum))
+  # top100.dt <- fread("./data/Top100Procedures.csv")
   
-#  ggplot(
-#    top100.dt,
-#    aes(x=drg.code),
-#    xlab = "Provider", 
-#    ylab = "Average total payments"
-#  ) + geom_bar( stat = "bin" )
+  # this should be 474412 rows by 14 columns
+  # dim(top100.dt)
   
 ```
+
