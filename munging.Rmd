@@ -1,12 +1,17 @@
 ---
+title: "Munging"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more ---
 title: "Temp"
 output: html_document
 ---
 ```{r}
 
   require(data.table)
-  require(ggplot2)
-  require(doBy)
+  #require(ggplot2)
+  #require(doBy)
   require(stringr)
 
 ```
@@ -15,7 +20,7 @@ output: html_document
 ```{r}
 
   project.dir <- "."
-  dataset.dir <- file.path(project.dir,"data")
+  dataset.dir <- file.path(project.dir,"data_raw")
   
   # when done working, you can save your workspace as:
   # save.image(file = file.path(project.dir, dataset.dir, "image.RData"))
@@ -25,14 +30,34 @@ output: html_document
 
 ```
 
+#### How to read
+
+```{r}
+
+  read.file <- function(path, year_num){
+    dt_temp <- fread(path)
+    dt_temp$year = year_num
+    return(dt_temp)
+  }
+  
+```
+
+
 #### Read the file 
 ```{r, echo=FALSE}
   
   # first, download the original file:
   # read the file
-  top100.dt <- fread("https://data.cms.gov/api/views/97k6-zzx3/rows.csv?accessType=DOWNLOAD")
+  #top100.dt <- fread("https://data.cms.gov/api/views/97k6-zzx3/rows.csv?accessType=DOWNLOAD")
+  dt.2011 <- read.file(file.path(dataset.dir, "Medicare_Provider_Charge_Inpatient_DRG100_FY2011.csv"), 2011)
+  dt.2012 <- read.file(file.path(dataset.dir, "Medicare_Provider_Charge_Inpatient_DRG100_FY2012.csv"), 2012)
+  dt.2013 <- read.file(file.path(dataset.dir, "Medicare_Provider_Charge_Inpatient_DRG100_FY2013.csv"), 2013)
+  
+  top100.dt <- rbind(dt.2011, dt.2012, dt.2013)
+  
   setnames(top100.dt, names(top100.dt), gsub(" ", "", names(top100.dt)))
   
+  rm(dt.2011, dt.2012, dt.2013)
 ```
 
 #### Clean up
@@ -46,6 +71,9 @@ Here is an example: "039 - EXTRACRANIAL PROCEDURES W/O CC/MCC".
 We break this into two (factor) columns: drg.code and drg.description.
 
 ```{r}
+  
+  # these are empty rows (all columns are "" or NA)
+  top100.dt <- top100.dt[which(!(top100.dt$DRGDefinition == "")),]
   
   # drg.code column:
   top100.dt$drg.code <- factor(word(top100.dt$DRGDefinition, 1))
@@ -75,8 +103,8 @@ Turn "money" columns into numbers without "$" signs:
 
 ```{r}
 
-  names_numeric = c("AverageMedicarePayments", "AverageTotalPayments", "AverageCoveredCharges")
-  for(col in names_numeric) set(top100.dt, j=col, value=as.numeric(gsub("$", "", top100.dt[[col]], fixed = TRUE)))
+#  names_numeric = c("AverageMedicarePayments", "AverageTotalPayments", "AverageCoveredCharges")
+#  for(col in names_numeric) set(top100.dt, j=col, value=as.numeric(gsub("$", "", top100.dt[[col]], fixed = TRUE)))
   
 ```
 
@@ -84,7 +112,7 @@ Turn character columns into factors where appropriate:
 
 ```{r}
   
-  names_factors = c("ProviderId", "ProviderName", "ProviderStreetAddress", "ProviderCity", "ProviderState", "HospitalReferralRegionDescription")
+  names_factors = c("ProviderId", "ProviderName", "ProviderStreetAddress", "ProviderCity", "ProviderState", "HospitalReferralRegion(HRR)Description")
   for (col in names_factors) set(top100.dt, j=col, value=as.factor(top100.dt[[col]]))
   
 ```
@@ -97,7 +125,7 @@ Change column names:
   setnames(
     top100.dt, 
     names(top100.dt), 
-    c("provider.id", "provider.name", "address", "city", "state", "zip", "region", "num.discharges", "covered.charges", "total.payments", "medicare.payments", "drg.code", "drg.description")
+    c("provider.id", "provider.name", "address", "city", "state", "zip", "region", "num.discharges", "covered.charges", "total.payments", "medicare.payments", "year", "drg.code", "drg.description")
   )
   
 ```
@@ -113,14 +141,13 @@ Write a .csv:
 
 ```{r}
 
-  total.amount.paid <- summaryBy(total.payments ~ provider.id, data = top100.dt, FUN = c(length, sum))
+#  total.amount.paid <- summaryBy(total.payments ~ provider.id, data = top100.dt, FUN = c(length, sum))
   
-  ggplot(
-    top100.dt,
-    aes(x=drg.code),
-    xlab = "Provider", 
-    ylab = "Average total payments"
-  ) + geom_bar( stat = "bin" )
+#  ggplot(
+#    top100.dt,
+#    aes(x=drg.code),
+#    xlab = "Provider", 
+#    ylab = "Average total payments"
+#  ) + geom_bar( stat = "bin" )
   
 ```
-
