@@ -130,6 +130,18 @@ Change column names:
   
 ```
 
+Taken from https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/MedicareFeeforSvcPartsAB/downloads/DRGdesc08.pdf, this delimited file details the MS-DRG (diagnosis related groups) codes
+```{r}
+  msdrg.dt <- fread(file.path(dataset.dir,"ms-drg-codes.tdsv"),sep='~',
+                    colClasses=('character'))
+  msdrg.dt[,cc := !grepl('w/o M?CC',Title) & grepl('[^M]CC',Title) ]
+  msdrg.dt[,mcc := !grepl('w/o M?CC',Title) & grepl('MCC',Title)]
+  msdrg.dt[,Title := NULL]
+  setnames(msdrg.dt,names(msdrg.dt),
+           c('drg.code','drg.mdc','drg.type','drg.cc','drg.mcc'))
+  msdrg.dt[,drg.code := factor(drg.code)]
+  top100.dt <- merge(top100.dt,msdrg.dt,by=c('drg.code'))
+```
 Write a .csv:
 
 ```{r}
@@ -142,10 +154,10 @@ To read the csv:
 
 ```{r}
 
-  # top100.dt <- fread("./data/Top100Procedures.csv")
+  #top100.dt <- fread("./data/Top100Procedures.csv")
   
-  # this should be 474412 rows by 14 columns
-  # dim(top100.dt)
+  #this should be 474412 rows by 18 columns
+  #dim(top100.dt)
   
 ```
 
