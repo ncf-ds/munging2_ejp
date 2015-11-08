@@ -134,11 +134,11 @@ Taken from https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-T
 ```{r}
   msdrg.dt <- fread(file.path(dataset.dir,"ms-drg-codes.tdsv"),sep='~',
                     colClasses=('character'))
-  msdrg.dt[,cc := !grepl('w/o M?CC',Title) & grepl('[^M]CC',Title) ]
-  msdrg.dt[,mcc := !grepl('w/o M?CC',Title) & grepl('MCC',Title)]
+  msdrg.dt[,comp := ifelse(grepl('w/o M?CC',Title),'NONE',
+                      ifelse(grepl('MCC',Title),'MCC','CC')) ]
   msdrg.dt[,Title := NULL]
   setnames(msdrg.dt,names(msdrg.dt),
-           c('drg.code','drg.mdc','drg.type','drg.cc','drg.mcc'))
+           c('drg.code','drg.mdc','drg.type','drg.comp'))
   msdrg.dt[,drg.code := factor(drg.code)]
   top100.dt <- merge(top100.dt,msdrg.dt,by=c('drg.code'))
 ```
