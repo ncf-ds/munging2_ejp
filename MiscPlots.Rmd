@@ -1,0 +1,24 @@
+---
+title: "Josh Wanderings"
+output: html_document
+---
+
+```{r}
+require(data.table)
+require(ggplot2)
+
+top100.dt <- fread("./data/Top100Procedures.csv")
+```
+
+```{r}
+ggplot(data=top100.dt,aes(x=total.payments,y=medicare.payments,color=year)) + geom_point(size=1) + facet_wrap(~drg.mdc)
+```
+```{r}
+ggplot(data=top100.dt,aes(x=1,y=medicare.payments/total.payments,color=drg.comp,fill=drg.comp)) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc)
+```
+```{r}
+ggplot(data=top100.dt,aes(x=medicare.payments/total.payments,y=total.payments)) + geom_point(size=0.5) + facet_wrap(~ drg.mdc)
+```
+```{r}
+ggplot(data=top100.dt,aes(x=total.payments-medicare.payments,y=medicare.payments/total.payments)) + geom_point(size=0.5) + facet_wrap(~ drg.mdc)
+```
