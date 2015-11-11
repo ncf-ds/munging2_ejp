@@ -7,7 +7,7 @@ output: html_document
 require(data.table)
 require(ggplot2)
 
-top100.dt <- fread("./data/Top100Procedures.csv")
+top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
 ```
 
 ```{r}

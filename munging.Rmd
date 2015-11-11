@@ -142,21 +142,44 @@ Taken from https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-T
   msdrg.dt[,drg.code := factor(drg.code)]
   top100.dt <- merge(top100.dt,msdrg.dt,by=c('drg.code'))
 ```
+
+Census Data:
+```{r}
+  census.fname <- file.path(dataset.dir,"DEC_10_DP_DPDP1_with_ann.csv")
+  census.cmd <- paste("awk 'NR == 1 || NR > 2'",census.fname)
+  #first few lines to get column types
+  census.dt <- fread(census.cmd, na.strings = c('(X)','( X )'),nrows=100)
+  classes <- sapply(census.dt,class)
+  #2nd column is GEO.id2, the zip code
+  classes[2] <- "character"
+  census.dt <- fread(census.cmd, na.strings = c('(X)','( X )'),colClasses=classes)
+  census.dt[,GEO.id2 := as.factor(GEO.id2)]
+  #HD01_S025,Number; SEX AND AGE - Total population - 65 years and over
+  #HD01_S050,Number; SEX AND AGE - Male population - 65 years and over
+  #HD01_S075,Number; SEX AND AGE - Female population - 65 years and over
+  setnames(census.dt,c("GEO.id2",
+                       "HD01_S025","HD01_S050","HD01_S075",
+                       "HD02_S025","HD02_S050","HD02_S075"),
+           c("zip","over.65.all","over.65.male","over.65.female",
+             "over.65.all.pct","over.65.male.pct","over.65.female.pct"))
+  census.dt[,grep('^(HD|GEO)',names(census.dt)) := NULL]
+  top100.dt <- merge(top100.dt,census.dt,by=c('zip'),all.x=TRUE)
+```
 Write a .csv:
 
 ```{r}
-
-  write.csv(top100.dt, file = "./data/Top100Procedures.csv", row.names = FALSE)
-  
+  out <- gzfile("./data/Top100Procedures.csv.gz","w")
+  write.csv(top100.dt, file = out, row.names = FALSE)
+  close(out)
 ```
 
 To read the csv:
 
 ```{r}
 
-  #top100.dt <- fread("./data/Top100Procedures.csv")
-  
-  #this should be 474412 rows by 18 columns
+  #top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
+  #top100.dt[,zip := as.factor(zip)]
+  #this should be 474412 rows by 23 columns
   #dim(top100.dt)
   
 ```
