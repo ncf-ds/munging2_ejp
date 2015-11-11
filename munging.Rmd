@@ -7,6 +7,7 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 title: "Temp"
 output: html_document
 ---
+
 ```{r}
 
   require(data.table)
@@ -131,6 +132,7 @@ Change column names:
 ```
 
 Taken from https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/MedicareFeeforSvcPartsAB/downloads/DRGdesc08.pdf, this delimited file details the MS-DRG (diagnosis related groups) codes
+
 ```{r}
   msdrg.dt <- fread(file.path(dataset.dir,"ms-drg-codes.tdsv"),sep='~',
                     colClasses=('character'))
@@ -145,7 +147,8 @@ Taken from https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-T
 
 Census Data:
 ```{r}
-  census.fname <- file.path(dataset.dir,"DEC_10_DP_DPDP1_with_ann.csv")
+  
+  census.fname <- file.path(dataset.dir,"demographic_ZTAC_2010", "DEC_10_DP_DPDP1_with_ann.csv")
   census.cmd <- paste("awk 'NR == 1 || NR > 2'",census.fname)
   #first few lines to get column types
   census.dt <- fread(census.cmd, na.strings = c('(X)','( X )'),nrows=100)
@@ -164,7 +167,52 @@ Census Data:
              "over.65.all.pct","over.65.male.pct","over.65.female.pct"))
   census.dt[,grep('^(HD|GEO)',names(census.dt)) := NULL]
   top100.dt <- merge(top100.dt,census.dt,by=c('zip'),all.x=TRUE)
+  
 ```
+
+
+Add lat/lon columns for each address in the dataset.
+```{r}
+
+  # to add lat/lon columns
+
+  top100.dt$temp.address <- paste(top100.dt$address, top100.dt$city, top100.dt$state, top100.dt$zip)
+  
+  assign_lat_lon <- function(data, add){
+    latlon = geocode(add, source = "dsk")
+    data[which(data$temp.address == add), lon:= latlon$lon]
+    data[which(data$temp.address == add), lat:= latlon$lat]
+  }
+
+  # takes forever:
+   lapply(unique(top100.dt$temp.address), function(x){assign_lat_lon(top100.dt, x)})
+
+  # there were warnings that not all addresses were found. For the remainders, we turn to Google.
+  assign_lat_lon <- function(data, add){
+    latlon = geocode(add, source = "google")
+    data[which(data$temp.address == add), lon:= latlon$lon]
+    data[which(data$temp.address == add), lat:= latlon$lat]
+  }
+
+  lapply(unique(top100.dt[which(is.na(top100.dt$lon)),]$temp.address), function(x){assign_lat_lon(top100.dt, x)})
+
+  # did we get everything? no. for the last two, I give a little help...
+  # google didn't like the '#' signs in the addresses. I realized this after I completed the task...
+  ### help # 1
+  latlon = geocode("1 MEDICAL PARK DRIVE, BENTON AR, 72015", source = "google")
+  top100.dt[which(top100.dt$temp.address == "#1 MEDICAL PARK DRIVE BENTON AR 72015"), lon:= latlon$lon]
+  top100.dt[which(top100.dt$temp.address == "#1 MEDICAL PARK DRIVE BENTON AR 72015"), lat:= latlon$lat]
+  ### help # 2
+  latlon = geocode("3 EAST BENJAMIN DRIVE NEW MARTINSVILL WV 26155", source = "google")
+  top100.dt[which(top100.dt$temp.address == "#3 EAST BENJAMIN DRIVE NEW MARTINSVILL WV 26155"), lon:= latlon$lon]
+  top100.dt[which(top100.dt$temp.address == "#3 EAST BENJAMIN DRIVE NEW MARTINSVILL WV 26155"), lat:= latlon$lat]
+ ### DONE!
+
+  # get rid of temp column
+  top100.dt[, temp.address := NULL]
+
+```
+
 Write a .csv:
 
 ```{r}
@@ -177,7 +225,7 @@ To read the csv:
 
 ```{r}
 
-  #top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
+  top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
   #top100.dt[,zip := as.factor(zip)]
   #this should be 474412 rows by 23 columns
   #dim(top100.dt)
