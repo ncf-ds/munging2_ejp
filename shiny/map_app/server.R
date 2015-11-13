@@ -8,12 +8,12 @@ library(data.table)
 
 
 # Define server logic required to plot various variables against mpg
-top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
+top100.dt <- fread("gunzip -c ../../data/Top100Procedures.csv.gz")
 
 shinyServer(function(input, output) {
   
   output$ggPlot <- renderPlot({
-    print(input$drgcode)
+    
     ggmap(
       get_map(
         location = input$statename, 
