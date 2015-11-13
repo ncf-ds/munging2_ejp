@@ -179,7 +179,7 @@ shinyUI(
     headerPanel("hi friends"),
     
     sidebarPanel(
-      selectInput("statename", "State:", states),
+      selectInput("statename", "State:", states, selected='FL'),
       selectInput("drgcode", "code:", drgs)
     ),
     
