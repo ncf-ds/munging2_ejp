@@ -37,13 +37,31 @@ shinyServer(function(input, output) {
       map_data('state')
     }
   })
-  output$ggPlot <- renderPlot({
+  
+  output$map <- renderPlot({
     ggplot(state.map(), aes(x = long, y = lat)) +
       geom_map(map=state.map(),fill="gray",color="gray60",aes(map_id=region)) +
-      coord_map() + geom_point(data=state.dt(),
-                               aes(x=lon,y=lat,size=num.discharges))
-  }
-  )
+      coord_map() + 
+      geom_point(data=state.dt(),
+                 aes(
+                    x=lon,
+                    y=lat,
+                    size=num.discharges,
+                    color = total.payments
+                 )
+      )
+  })
+
+  output$scatterplot <- renderPlot({
+    ggplot(data = state.dt(),
+           aes(
+              x = num.discharges,
+              y = total.payments,
+              size = num.discharges,
+              color = total.payments
+            )
+      ) + geom_point() + facet_grid(year~.) + scale_size(range = c(1.5,7))
+  })
   
 })
 

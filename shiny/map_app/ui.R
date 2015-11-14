@@ -120,8 +120,7 @@ drgs = list(
 shinyUI(
   verticalLayout(
     
-    # Application title
-    headerPanel("hi friends"),
+    headerPanel("Hospital charge data"),
     
     sidebarPanel(
       selectInput("statename", "State:", states, selected='FL'),
@@ -129,7 +128,8 @@ shinyUI(
     ),
     
     mainPanel(
-        plotOutput("ggPlot")
+        plotOutput("map"),
+        plotOutput("scatterplot")
     )
     
   )
