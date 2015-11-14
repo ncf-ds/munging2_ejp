@@ -2,66 +2,11 @@ library(shiny)
 
 
 
-states = list( 
-  'Alaska'=                  'AK', 
-  'Alabama'=                 'AL', 
-  'Arkansas'=                'AR', 
-  'American Samoa'=          'AS', 
-  'Arizona'=                 'AZ', 
-  'California'=              'CA', 
-  'Colorado'=                'CO', 
-  'Connecticut'=             'CT', 
-  'District of Columbia'=    'DC', 
-  'Delaware'=                'DE', 
-  'Florida'=                 'FL', 
-  'Georgia'=                 'GA', 
-  'Guam'=                    'GU', 
-  'Hawaii'=                  'HI', 
-  'Iowa'=                    'IA', 
-  'Idaho'=                   'ID', 
-  'Illinois'=                'IL', 
-  'Indiana'=                 'IN', 
-  'Kansas'=                  'KS', 
-  'Kentucky'=                'KY', 
-  'Louisiana'=               'LA', 
-  'Massachusetts'=           'MA', 
-  'Maryland'=                'MD', 
-  'Maine'=                   'ME', 
-  'Michigan'=                'MI', 
-  'Minnesota'=               'MN', 
-  'Missouri'=                'MO', 
-  'Northern Mariana Islands'='MP', 
-  'Mississippi'=             'MS', 
-  'Montana'=                 'MT', 
-  'National'=                'NA', 
-  'North Carolina'=          'NC', 
-  'North Dakota'=            'ND', 
-  'Nebraska'=                'NE', 
-  'New Hampshire'=           'NH', 
-  'New Jersey'=              'NJ', 
-  'New Mexico'=              'NM', 
-  'Nevada'=                  'NV', 
-  'New York'=                'NY', 
-  'Ohio'=                    'OH', 
-  'Oklahoma'=                'OK', 
-  'Oregon'=                  'OR', 
-  'Pennsylvania'=            'PA', 
-  'Puerto Rico'=             'PR', 
-  'Rhode Island'=            'RI', 
-  'South Carolina'=          'SC', 
-  'South Dakota'=            'SD', 
-  'Tennessee'=               'TN', 
-  'Texas'=                   'TX', 
-  'Utah'=                    'UT', 
-  'Virginia'=                'VA', 
-  'Virgin Islands'=          'VI', 
-  'Vermont'=                 'VT', 
-  'Washington'=              'WA', 
-  'Wisconsin'=               'WI', 
-  'West Virginia'=           'WV', 
-  'Wyoming'=                 'WY'
-)
-
+states <- state.abb
+names(states) <- state.name
+# TODO: pull AK & HI from world2Hires & reposition on main map
+states <- states[!grepl('AK|HI',states)]
+states <- append(states,list('United States' = 'all'),after=0)
 
 drgs = list(
   "057 - DEGENERATIVE NERVOUS SYSTEM DISORDERS W/O MCC" = "057",

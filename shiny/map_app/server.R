@@ -5,20 +5,41 @@ library(maps)
 
 # will need to load .Rda or something similar.
 
-
 # Define server logic required to plot various variables against mpg
 top100.dt <- fread("gunzip -c ../../data/Top100Procedures.csv.gz")
 
+outbounds <- function(v) {
+  # get the range, excluding the outer 2%
+  r1 <- quantile(v,c(.05,.95))
+  # compute the distance
+  s <- (r1[2] - r1[1])
+  #effectively this doubles the 1% - 99% range:
+  r1 + s*c(-1,1)*0.5
+}
+
+filter_misplaced <- function(dt) {
+  lat.bounds <- outbounds(dt$lat)
+  lon.bounds <- outbounds(dt$lon)
+  dt[lat >= lat.bounds[1] & lat <= lat.bounds[2] &
+     lon >= lon.bounds[1] & lon <= lon.bounds[2],]
+}
+
 shinyServer(function(input, output) {
   state.dt <<- reactive({
-    top100.dt[state == input$statename & drg.code == input$drgcode,]
+    filter_misplaced(top100.dt[('all' == input$statename |
+                                state == input$statename )
+                               & drg.code == input$drgcode,])
   })
   state.map <<- reactive({
-    map_data('state',regions=state.name[grep(input$statename,state.abb)])
+    if( input$statename != 'all' ) {
+      map_data('state',regions=state.name[grep(input$statename,state.abb)])
+    } else {
+      map_data('state')
+    }
   })
   output$ggPlot <- renderPlot({
     ggplot(state.map(), aes(x = long, y = lat)) +
-      geom_polygon(fill="gray") +
+      geom_map(map=state.map(),fill="gray",color="gray60",aes(map_id=region)) +
       coord_map() + geom_point(data=state.dt(),
                                aes(x=lon,y=lat,size=num.discharges))
   }
