@@ -129,27 +129,24 @@ shinyUI(
     
     # top section
     hr(),
-    h3("State plot"),
-    fluidRow(plotOutput("map")),
-    
-    # old version, just in case -erin
-    #fluidRow(
-    #  column(6, plotOutput("map")),
-    #  column(4, plotOutput("scatterplot"), offset = 0),
-    #  column(2, plotOutput("ranks"), offset=0 )
-    #  ),
-    
-    # bottom section
-    hr(),
-    h3("Hospital information broken down by year"),
-    # I think we may want to add the legends back to these -erin
+#     h3("State plot"),
+#     fluidRow(plotOutput("map")),
+#   
+# 
+#     # bottom section
+#     #hr(),
+#     h3("Hospital information broken down by year"),
+#     # I think we may want to add the legends back to these -erin
+#     fluidRow(
+#       column(6, plotOutput("scatterplot"), offset = 0),
+#       column(6, plotOutput("ranks"), offset=0 )
+#     ),
+#     hr(),
     fluidRow(
-      column(6, plotOutput("scatterplot"), offset = 0),
-      column(6, plotOutput("ranks"), offset=0 )
-    ),
-    
-    # end
-    hr()
+      column(5, plotOutput("map")),
+      column(4, plotOutput("scatterplot"), offset = 0),
+      column(3, plotOutput("ranks"), offset=0 )
+      )
     
   )
 )
