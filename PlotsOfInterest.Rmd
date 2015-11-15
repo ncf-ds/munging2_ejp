@@ -1,29 +1,60 @@
 ---
-title: "Untitled"
+title: "Data Munging and EDA"
 output: html_document
 ---
 
-```{r}
+```{r, echo = FALSE}
 
   #install.packages("gridExtra")
   library(gridExtra)
   library(ggplot2)
   library(data.table)
 
+```
+
+```{r, echo = FALSE, cache = TRUE}
+
   top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
 
 ```
 
+# Setup
+
+The data we're looking at is from [.....] (josh, phil, erin, fill this in). We made the following modifications (work shown in the file 'munging.Rmd'):
+* We added a "year" column and joined (with rbind) the data sets for years 2011, 2012 and 2013.
+* We added lat/lon info for each hospital (data from the [Data Science Toolkit API](http://www.inside-r.org/packages/cran/RDSTK/docs/street2coordinates)
+* We included information about the over-65 population in the zip code of the hospital. Data from [..] (josh)
+* We broke up the drg code into two columns: code number and code description.
+* We joined information about the "major diagnostic code" that corresponds to each drg code. Data from [..] (josh). This classifies the 106 drg codes into 16 categories. 
+
+# Interactive graphics
+
+As a group, we were curious about building an app with Shiny. You can see our app [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Or you can run the app locally by doing [..] (josh, phil, what do we plan to turn in?)
+
+# Other exploration
+
+In the following plot, we look at the fraction of the bill covered by medicare, facetted by major diagnostic codes and unique combinations of complications and whether the procedure was medical or surgical.
+
+The complication classifications are:
+* None 
+* CC (complications and comorbidities)
+* MCC (major complications and comorbidities)
 
 ```{r}
 
+  # josh, phil, should we make our y label better, or the "drg.comp" on the right better?
   ggplot(
     data=top100.dt,
     aes(x=1,y=medicare.payments/total.payments,color=drg.comp,fill=drg.comp)
-  ) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc)
+  ) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc) + theme(axis.text.x = element_blank(), axis.ticks = element_blank(), axis.title.x=element_blank()) 
 
 ```
 
+We we also interested in the number of discharges (how many times a hospital did a certain procedure) per state and major diagnostic code. For example, were certain codes more common in certain states? (Not really - the relationship across major diagnostic codes appears stronger than the relationship across states.)
+
+Below, we visualize this information in two ways: in the graph on the left, we take the sum of the number of discharges, and in the graph on the right, we take the average.
+
+We were surprised to see that the images were different - when taking the average, code 19 looks like it is the most common. When summed, code 5 looks like it is the most common.
 
 ```{r}
 
@@ -34,10 +65,24 @@ output: html_document
                                 ), 
                               by = .(state, drg.mdc)]
   
-  t.n.d <- ggplot(aes(x = drg.mdc, y = state, fill = total.num.discharges), data = top100.grouped.state) + geom_raster()
-  a.n.d <- ggplot(aes(x = drg.mdc, y = state, fill = avg.num.discharges), data = top100.grouped.state) + geom_raster()
-  grid.arrange(t.n.d, a.n.d, ncol=2, nrow =1)
+  ggplot(aes(x = drg.mdc, y = state, fill = total.num.discharges), data = top100.grouped.state) + geom_raster()
+
+  ggplot(aes(x = drg.mdc, y = state, fill = avg.num.discharges), data = top100.grouped.state) + geom_raster() 
   
+```
+
+```{r, echo = FALSE}
+
+  # get rid of variables that will not be used again.
+  rm(top100.grouped.state)
+  
+```
+
+
+So we visualized this in a second way. Here, we do not group by state - only by major diagnostic code. 
+
+```{r}
+
   top100.grouped <- top100.dt[, 
                               .(total.num.discharges = sum(num.discharges),
                                 avg.num.discharges = mean(num.discharges)
@@ -45,26 +90,29 @@ output: html_document
                               by = drg.mdc]  
     
   ggplot(aes(x = drg.mdc, y = total.num.discharges, size = avg.num.discharges),data = top100.grouped) + geom_point() + scale_size(range = c(2,7))
-
   
 ```
 
+Our data has three other numeric columns that we were curious to plot in the same way. Again, we group by major diagnostic code and state, and we visualize the sum over the following columns:
+* covered charges (josh, phil, what is this...)
+* total payments (total amount received by the hospital)
+* medicare payments (amount paid by medicare)
 
 ```{r}
 
   top100.grouped <- top100.dt[, 
-                              .(total.num.discharges = sum(num.discharges),
+                              .(
                                 total.covered.charges = sum(covered.charges), 
                                 total.payments = sum(total.payments), 
                                 medicare.payments = sum(medicare.payments)
                                 ), 
                               by = .(drg.mdc, state)]
   
-  n.d <- ggplot(aes(x = drg.mdc, y = state, fill = total.num.discharges), data = top100.grouped) + geom_raster()
-  c.c <- ggplot(aes(x = drg.mdc, y = state, fill = total.covered.charges), data = top100.grouped) + geom_raster()
-  t.p <- ggplot(aes(x = drg.mdc, y = state, fill = total.payments), data = top100.grouped) + geom_raster()
-  m.p <- ggplot(aes(x = drg.mdc, y = state, fill = medicare.payments), data = top100.grouped) + geom_raster()
-  grid.arrange(n.d, c.c, t.p, m.p, ncol=2, nrow =2)
+  ggplot(aes(x = drg.mdc, y = state, fill = total.covered.charges), data = top100.grouped) + geom_raster()
+  ggplot(aes(x = drg.mdc, y = state, fill = total.payments), data = top100.grouped) + geom_raster()
+  ggplot(aes(x = drg.mdc, y = state, fill = medicare.payments), data = top100.grouped) + geom_raster()
   
 ```
 
+
+(josh, can you add your new cool plots here?)
