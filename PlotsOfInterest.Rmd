@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+
+  #install.packages("gridExtra")
+  library(gridExtra)
+  library(ggplot2)
+  library(data.table)
+
+  top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
+
+```
+
+
+```{r}
+
+  ggplot(
+    data=top100.dt,
+    aes(x=1,y=medicare.payments/total.payments,color=drg.comp,fill=drg.comp)
+  ) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc)
+
+```
+
+
+```{r}
+
+  
+  top100.grouped.state <- top100.dt[, 
+                              .(total.num.discharges = sum(num.discharges),
+                                avg.num.discharges = mean(num.discharges)
+                                ), 
+                              by = .(state, drg.mdc)]
+  
+  t.n.d <- ggplot(aes(x = drg.mdc, y = state, fill = total.num.discharges), data = top100.grouped.state) + geom_raster()
+  a.n.d <- ggplot(aes(x = drg.mdc, y = state, fill = avg.num.discharges), data = top100.grouped.state) + geom_raster()
+  grid.arrange(t.n.d, a.n.d, ncol=2, nrow =1)
+  
+  top100.grouped <- top100.dt[, 
+                              .(total.num.discharges = sum(num.discharges),
+                                avg.num.discharges = mean(num.discharges)
+                                ), 
+                              by = drg.mdc]  
+    
+  ggplot(aes(x = drg.mdc, y = total.num.discharges, size = avg.num.discharges),data = top100.grouped) + geom_point() + scale_size(range = c(2,7))
+
+  
+```
+
+
+```{r}
+
+  top100.grouped <- top100.dt[, 
+                              .(total.num.discharges = sum(num.discharges),
+                                total.covered.charges = sum(covered.charges), 
+                                total.payments = sum(total.payments), 
+                                medicare.payments = sum(medicare.payments)
+                                ), 
+                              by = .(drg.mdc, state)]
+  
+  n.d <- ggplot(aes(x = drg.mdc, y = state, fill = total.num.discharges), data = top100.grouped) + geom_raster()
+  c.c <- ggplot(aes(x = drg.mdc, y = state, fill = total.covered.charges), data = top100.grouped) + geom_raster()
+  t.p <- ggplot(aes(x = drg.mdc, y = state, fill = total.payments), data = top100.grouped) + geom_raster()
+  m.p <- ggplot(aes(x = drg.mdc, y = state, fill = medicare.payments), data = top100.grouped) + geom_raster()
+  grid.arrange(n.d, c.c, t.p, m.p, ncol=2, nrow =2)
+  
+```
+

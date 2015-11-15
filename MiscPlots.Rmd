@@ -11,7 +11,7 @@ top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
 ```
 
 ```{r}
-ggplot(data=top100.dt,aes(x=total.payments,y=medicare.payments,color=year)) + geom_point(size=1) + facet_wrap(~drg.mdc)
+ggplot(data=top100.dt,aes(x=total.payments,y=medicare.payments,color=factor(year))) + geom_point(size=1) + facet_wrap(~drg.mdc)
 ```
 ```{r}
 ggplot(data=top100.dt,aes(x=1,y=medicare.payments/total.payments,color=drg.comp,fill=drg.comp)) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc)
