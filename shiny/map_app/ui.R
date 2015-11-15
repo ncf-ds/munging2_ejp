@@ -118,19 +118,25 @@ drgs = list(
   "885 - PSYCHOSES" = "885")
 
 shinyUI(
-  verticalLayout(
+  fluidPage(
+    #theme = "bootstrap.css",
+    titlePanel(title = "Hospital charge data"), 
     
-    headerPanel("Hospital charge data"),
+    hr(),
     
-    sidebarPanel(
-      selectInput("statename", "State:", states, selected='FL'),
-      selectInput("drgcode", "code:", drgs)
+    fluidRow(
+      column(2, selectInput("statename", "State:", states, selected='FL')),
+      column(10, selectInput("drgcode", "DRG code:", drgs, width = '100%'), offset = 0)
     ),
     
-    mainPanel(
-        plotOutput("map"),
-        plotOutput("scatterplot")
-    )
+    hr(),
+    
+    fluidRow(
+      column(6, plotOutput("map")),
+      column(6, plotOutput("scatterplot"), offset = 0)
+      ),
+    
+    hr()
     
   )
 )
