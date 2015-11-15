@@ -117,24 +117,38 @@ drgs = list(
 
 shinyUI(
   fluidPage(
-    #theme = "bootstrap.css",
+    # title,
     titlePanel(title = "Hospital charge data"), 
     
+    # controls
     hr(),
-    
     fluidRow(
       column(2, selectInput("statename", "State:", states, selected='FL')),
       column(10, selectInput("drgcode", "DRG code:", drgs, width = '100%'), offset = 0)
     ),
     
+    # top section
     hr(),
+    h3("State plot"),
+    fluidRow(plotOutput("map")),
     
+    # old version, just in case -erin
+    #fluidRow(
+    #  column(6, plotOutput("map")),
+    #  column(4, plotOutput("scatterplot"), offset = 0),
+    #  column(2, plotOutput("ranks"), offset=0 )
+    #  ),
+    
+    # bottom section
+    hr(),
+    h3("Hospital information broken down by year"),
+    # I think we may want to add the legends back to these -erin
     fluidRow(
-      column(6, plotOutput("map")),
-      column(4, plotOutput("scatterplot"), offset = 0),
-      column(2, plotOutput("ranks"), offset=0 )
-      ),
+      column(6, plotOutput("scatterplot"), offset = 0),
+      column(6, plotOutput("ranks"), offset=0 )
+    ),
     
+    # end
     hr()
     
   )
