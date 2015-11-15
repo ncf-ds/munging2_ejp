@@ -8,7 +8,7 @@ library(grid)
 
 # Define server logic required to plot various variables against mpg
 top100.dt <- fread("gunzip -c ../../data/Top100Procedures.csv.gz")
-top100.dt.2013 <- top100.dt[year==2013,.(provider.id,drg.code,num.discharges,total.payments,medicare.payments)]
+top100.dt.2013 <- top100.dt[year==2013,.(provider.id,drg.code,num.discharges,covered.charges,total.payments,medicare.payments)]
 ns <- names(top100.dt.2013)[!grepl("prov|drg",names(top100.dt.2013))]
 setnames(top100.dt.2013,ns,paste0(ns,".2013"))
 top100.dt <- merge(top100.dt,top100.dt.2013,by=c('provider.id','drg.code'))
@@ -32,9 +32,12 @@ filter_misplaced <- function(dt) {
 
 shinyServer(function(input, output) {
   state.dt <<- reactive({
-    filter_misplaced(top100.dt[('all' == input$statename |
-                                state == input$statename )
-                               & drg.code == input$drgcode,])
+    dt <- filter_misplaced(top100.dt[('all' == input$statename |
+                                  state == input$statename )
+                                 & drg.code == input$drgcode,])
+    dt$var.x <- dt[[input$var.x]]
+    setnames(dt,paste0(input$var.y,c("",".2013")),c("var.y","var.y.2013"))
+    dt
   })
   state.map <<- reactive({
     if( input$statename != 'all' ) {
@@ -52,14 +55,16 @@ shinyServer(function(input, output) {
                  aes(
                     x=lon,
                     y=lat,
-                    size=num.discharges,
-                    colour = total.payments
+                    size=var.x,
+                    colour = var.y
                  )
       ) + 
-      guides( size = guide_legend(title.position = 'left',
+      guides( size = guide_legend(title = input$var.x,
+                                  title.position = 'left',
                                   title.vjust = 0,
                                   title.theme = element_text(angle=90)),
-              colour = guide_legend(title.position = 'left',
+              colour = guide_legend(title = input$var.y,
+                                    title.position = 'left',
                                     title.vjust = 0,
                                     title.theme = element_text(angle=90))
               ) +      
@@ -75,33 +80,35 @@ shinyServer(function(input, output) {
   output$scatterplot <- renderPlot({
     ggplot(data = state.dt(),
            aes(
-             x = num.discharges,
-             y = total.payments,
-             size = num.discharges,
-             color = total.payments
+             x = var.x,
+             y = var.y,
+             size = var.x,
+             color = var.y
            )
     ) + geom_point() + facet_grid(year~.) + 
       scale_size(range = c(1.5,7)) +
       theme(legend.position = 'none') +
-      labs(title = "year breakdown")
+      labs(title = "year breakdown",x=input$var.x,y=input$var.y)
   })
   output$ranks <- renderPlot({
     ggplot(data = state.dt(),
            aes(
-             y = rank(total.payments),
+             y = rank(var.y),
              x = year,
-             size=num.discharges,
-             color = rank(total.payments.2013),
+             size=var.x,
+             color = rank(var.y.2013),
              group = provider.id
            )
     ) + scale_x_discrete(expand=c(0,0)) + geom_point() + geom_path() +
-      guides( size = guide_legend(title.position = 'left',
+      guides( size = guide_legend(title=input$var.x,
+                                  title.position = 'left',
                                   title.vjust = 0,
                                   title.theme = element_text(angle=90)),
-              colour = guide_legend(title.position = 'left',
+              colour = guide_legend(title=paste("2013",input$var.y,"rank"),
+                                    title.position = 'left',
                                     title.vjust = 0,
                                     title.theme = element_text(angle=90))
-      ) + labs( title = "rank changes")
+      ) + labs( title = "rank changes", y = paste(input$var.y,"rank"), x=input$var.x)
 
   })
   
