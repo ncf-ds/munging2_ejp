@@ -20,16 +20,17 @@ output: html_document
 
 # Setup
 
-The data we're looking at is from [.....] (josh, phil, erin, fill this in). We made the following modifications (work shown in the file 'munging.Rmd'):
+The data we're looking at is from [.....] (josh, phil, erin, fill this in). We made the following modifications ( work shown in ['munging.Rmd'](munging.html) ):
+
 * We added a "year" column and joined (with rbind) the data sets for years 2011, 2012 and 2013.
 * We added lat/lon info for each hospital (data from the [Data Science Toolkit API](http://www.inside-r.org/packages/cran/RDSTK/docs/street2coordinates)
-* We included information about the over-65 population in the zip code of the hospital. Data from [..] (josh)
+* We included information about the over-65 population in the zip code of the hospital. Data from the 2010 Census (http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml), by zipcode tabulation areas.
 * We broke up the drg code into two columns: code number and code description.
-* We joined information about the "major diagnostic code" that corresponds to each drg code. Data from [..] (josh). This classifies the 106 drg codes into 16 categories. 
+* We joined information about the "major diagnostic code" that corresponds to each drg code. Data from http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml. This classifies the 106 drg codes into 16 categories.
 
 # Interactive graphics
 
-As a group, we were curious about building an app with Shiny. You can see our app [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Or you can run the app locally by doing [..] (josh, phil, what do we plan to turn in?)
+As a group, we were curious about building an app with Shiny. You can see our app [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Or you can run the app locally by loading `shiny/map_app/server.R` into Rstudio.
 
 # Other exploration
 
@@ -43,10 +44,13 @@ The complication classifications are:
 ```{r}
 
   # josh, phil, should we make our y label better, or the "drg.comp" on the right better?
+  lgnd.comp <- guide_legend(title="Complications")
   ggplot(
     data=top100.dt,
     aes(x=1,y=medicare.payments/total.payments,color=drg.comp,fill=drg.comp)
-  ) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc) + theme(axis.text.x = element_blank(), axis.ticks = element_blank(), axis.title.x=element_blank()) 
+  ) + geom_violin() + facet_grid(drg.type+drg.comp ~ drg.mdc) + theme(axis.text.x = element_blank(), axis.ticks = element_blank(), axis.title.x=element_blank()) +
+    guides(fill = lgnd.comp, colour = lgnd.comp) +
+    labs(y="Fraction Paid by Medicare")
 
 ```
 
@@ -94,8 +98,8 @@ So we visualized this in a second way. Here, we do not group by state - only by 
 ```
 
 Our data has three other numeric columns that we were curious to plot in the same way. Again, we group by major diagnostic code and state, and we visualize the sum over the following columns:
-* covered charges (josh, phil, what is this...)
-* total payments (total amount received by the hospital)
+* covered charges (the provider's average nominal charge for services)
+* total payments (total amount (average) received by the hospital)
 * medicare payments (amount paid by medicare)
 
 ```{r}
