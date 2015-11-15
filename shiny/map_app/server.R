@@ -7,6 +7,11 @@ library(maps)
 
 # Define server logic required to plot various variables against mpg
 top100.dt <- fread("gunzip -c ../../data/Top100Procedures.csv.gz")
+top100.dt.2011 <- top100.dt[year==2011,.(provider.id,drg.code,num.discharges,total.payments,medicare.payments)]
+ns <- names(top100.dt.2011)[!grepl("prov|drg",names(top100.dt.2011))]
+setnames(top100.dt.2011,ns,paste0(ns,".2011"))
+top100.dt <- merge(top100.dt,top100.dt.2011,by=c('provider.id','drg.code'))
+top100.dt[,year := as.factor(year)]
 
 outbounds <- function(v) {
   # get the range, excluding the outer 2%
@@ -49,7 +54,24 @@ shinyServer(function(input, output) {
                     size=num.discharges,
                     color = total.payments
                  )
-      )
+      ) + theme(axis.line=element_blank(),axis.text.x=element_blank(),
+                axis.text.y=element_blank(),axis.ticks=element_blank(),
+                axis.title.x=element_blank(),
+                axis.title.y=element_blank(),legend.position = 'left')
+  }) 
+  
+  output$ranks <- renderPlot({
+    ggplot(data = state.dt(),
+           aes(
+             y = rank(total.payments),
+             x = year,
+             size=num.discharges,
+             color = rank(total.payments.2011),
+             group = provider.id
+           )
+    ) + scale_x_discrete(expand=c(0,0)) + geom_point() + geom_path() +
+      theme(legend.position = 'none')
+
   })
 
   output$scatterplot <- renderPlot({
@@ -60,7 +82,8 @@ shinyServer(function(input, output) {
               size = num.discharges,
               color = total.payments
             )
-      ) + geom_point() + facet_grid(year~.) + scale_size(range = c(1.5,7))
+      ) + geom_point() + facet_grid(year~.) + 
+        scale_size(range = c(1.5,7)) + theme(legend.position = 'none')
   })
   
 })

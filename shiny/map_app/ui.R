@@ -1,7 +1,5 @@
 library(shiny)
 
-
-
 states <- state.abb
 names(states) <- state.name
 # TODO: pull AK & HI from world2Hires & reposition on main map
@@ -133,7 +131,8 @@ shinyUI(
     
     fluidRow(
       column(6, plotOutput("map")),
-      column(6, plotOutput("scatterplot"), offset = 0)
+      column(4, plotOutput("scatterplot"), offset = 0),
+      column(2, plotOutput("ranks"), offset=0 )
       ),
     
     hr()
