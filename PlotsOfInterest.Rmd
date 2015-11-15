@@ -43,7 +43,6 @@ The complication classifications are:
 
 ```{r}
 
-  # josh, phil, should we make our y label better, or the "drg.comp" on the right better?
   lgnd.comp <- guide_legend(title="Complications")
   ggplot(
     data=top100.dt,
