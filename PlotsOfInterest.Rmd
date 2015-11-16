@@ -63,14 +63,9 @@ Our app provides selectors on state, DRG code, and choice of two numeric variabl
 
 Our app is online (at least, it is, at the time of this writing), and can be found [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Alternatively, you can run the app locally by loading `shiny/map_app/server.R` into Rstudio.
 
-TODO (maybe)
-
-* What are examples of interesting findings one can do with the map?
-
 # Other Exploration
 
 In addition, we pursued a number of directions in analysis. Our findings are summarized below.
-
 
 In the following plot, we look at the fraction of the bill covered by medicare, faceted by major diagnostic codes and unique combinations of complications and whether the procedure was medical or surgical.
 
@@ -113,14 +108,6 @@ We were surprised to see that the images were different - when taking the averag
   
 ```
 
-```{r, echo = FALSE}
-
-  # get rid of variables that will not be used again.
-  rm(top100.grouped.state)
-  
-```
-
-
 So we visualized this in a second way. Here, we do not group by state - only by major diagnostic code. 
 
 ```{r}
@@ -158,13 +145,11 @@ Our data has three other numeric columns that we were curious to plot in the sam
 ```
 
 
-(josh, can you add your new cool plots here?)
-
 # Conclusion
 
-We provide an exploration of the CMS Hospital Charge Data. A shiny app exploration spatial and temporal relationships among key numeric variables in the data was made. We additionally provide a number of static plots depicting findings of interest.
-
+We provide an exploration of the CMS Hospital Charge Data. We developed a shiny app that explored spatial and temporal relationships among key numeric variables in the data. We additionally provide a number of static plots depicting findings of interest.
 
 # Contributions
 
-* PP: wrote intro/summary, prototyped choropleths, contributed to shiny app, engaged in pair EDA
+* Phil: wrote intro/summary, prototyped choropleths, contributed to shiny app, engaged in group EDA
+* Erin: initial munging, contributed to shiny app, hosted app on Amazon, group and solo EDA
