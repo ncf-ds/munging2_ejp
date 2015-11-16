@@ -13,12 +13,10 @@ A definition of DRG follows: "A Diagnosis-Related Group (DRG) is a statistical s
 
 In total the 100 DRGs in the data span 7 million discharges or 60% of total Medicare IPPS discharges. 
 
-In summary, this dataset provides information on the expenditure of medicare funding by hospitals on the most frequent procedures. Whereas in general healthcare continues to comprise a significant fraction of the US GPD, and partisian debate over governmental involvement in healthcare continues to rage, having empirical evidence on how funds are actually distributed spent is critical to keeping our opinions grounded in reality.
+In summary, this dataset provides information on the expenditure of medicare funding by hospitals on the most frequent procedures. Whereas in general, healthcare continues to comprise a significant fraction of the US GPD, and partisian debate over governmental involvement in healthcare continues to rage, having empirical evidence on how funds are actually distributed spent is critical to keeping our opinions grounded in reality.
 
 ```{r, echo = FALSE}
 
-  #install.packages("gridExtra")
-  library(gridExtra)
   library(ggplot2)
   library(data.table)
 
@@ -96,7 +94,7 @@ The complication classifications are:
 
 We we also interested in the number of discharges (how many times a hospital did a certain procedure) per state and major diagnostic code. For example, were certain codes more common in certain states? (Not really - the relationship across major diagnostic codes appears stronger than the relationship across states.)
 
-Below, we visualize this information in two ways: in the graph on the left, we take the sum of the number of discharges, and in the graph on the right, we take the average.
+Below, we visualize this information in two ways: in the first graph, we take the sum of the number of discharges, and in the second, we take the average.
 
 We were surprised to see that the images were different - when taking the average, code 19 looks like it is the most common. When summed, code 5 looks like it is the most common.
 
