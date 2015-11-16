@@ -5,7 +5,7 @@ output: html_document
 
 # Introduction
 
-Here we provide an exploratory analysis of the "Hospital Charge Data" (HCD), a USA public dataset on *inpatient* (i.e., admitted to a hospital) medicare provider utilization and payments. The dataset is managed, curated, and hosted by the Centers for Medicare & Medicaid Services (CMS) and can be found [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Provider-Charge-Data/Inpatient.html). At the time of this writing, data are available for fiscal years 2011-2013. 
+Here we provide an exploratory analysis of the "Hospital Charge Data" (HCD), a U.S. public dataset on *inpatient* (i.e., admitted to a hospital) medicare provider utilization and payments. The dataset is managed, curated, and hosted by the Centers for Medicare & Medicaid Services (CMS) and can be found [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Provider-Charge-Data/Inpatient.html). At the time of this writing, data are available for fiscal years 2011-2013. 
 
 HCD consists of hospital specific charges for over 3000 U.S. hospital receiving medicare funding  It includes the top 100 most frequently billed discharges paid by Medicare, as classified by the Medicare Severity Diagnosis Related Group (MS-DRG). 
 
@@ -13,7 +13,7 @@ A definition of DRG follows: "A Diagnosis-Related Group (DRG) is a statistical s
 
 In total the 100 DRGs in the data span 7 million discharges or 60% of total Medicare IPPS discharges. 
 
-In summary, this dataset provides information on the expenditure of medicare funding by hospitals on the most frequent procedures. Whereas in general, healthcare continues to comprise a significant fraction of the US GPD, and partisian debate over governmental involvement in healthcare continues to rage, having empirical evidence on how funds are actually distributed spent is critical to keeping our opinions grounded in reality.
+In summary, this dataset provides information on the expenditure of medicare funding by hospitals on the most frequent procedures. Whereas in general, health care continues to consume a significant fraction of the US GDP, and partisan debate over governmental involvement in healthcare continues to rage, having empirical evidence on how funds are actually distributed spent is critical to keeping our opinions grounded in reality.
 
 ```{r, echo = FALSE}
 
@@ -24,7 +24,7 @@ In summary, this dataset provides information on the expenditure of medicare fun
 
 # Data Munging
 
-Several modifications to the raw data were made, including the creation of derived variables and enrichment with auxillary datasets (e.g. census).
+Several modifications to the raw data were made, including the creation of derived variables and enrichment with  auxiliary datasets (e.g. census).
 We list these modifications below ( See ['munging.Rmd'](munging.html) for a record of steps taken with `R` code ):
 
 * Added a "year" column and joined (with rbind) the data sets for years 2011, 2012 and 2013.
@@ -46,12 +46,12 @@ The first five rows of the final dataset are shown below.
 Four numeric variables are given in the raw data (note: they were renamed) and are the primary object of our analysis. They are described below:
 
 * `num.charges`: "the number of beneficiaries who were released from the inpatient hospital after receiving care."[[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9848)
-* `covered.charges`: (average) (Assumed) The amount charge by the provider. Note that: "the provider has an agreement with Medicare to accept Medicare’s payment and the difference is not paid by Medicare or any other entity, including the beneficiary." [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9264)
+* `covered.charges`: (average) (Assumed) The amount charged by the provider. Note that: "the provider has an agreement with Medicare to accept Medicare’s payment and the difference is not paid by Medicare or any other entity, including the beneficiary." [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9264)
 * `total.payments`: (average) "what Medicare actually pays to the provider as well as co-payment and deductible amounts that the beneficiary is responsible for and payments by third parties for coordination of benefits" [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9262)
 * `medicare.payments`: (average) "what the provider bills to Medicare" [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9262)
 
 
-For the first iteration of our exploratory analysis, we were interested to view the spatial trends of these metrics. Choropleths on the state and zip code level were made (see appendix). But the results from the choropleths were found to be lacking. In particular, aggregating hospital data by region (e.g. zip code, state) made interpretation of the depicted quantites difficult. In the end, we decided to plot the spatial data on the level of hospitals (one point per hospital).
+For the first iteration of our exploratory analysis, we were interested to view the spatial trends of these metrics. Choropleths on the state and zip code level were made (see appendix). But the results from the choropleths were found to be lacking. In particular, aggregating hospital data by region (e.g. zip code, state) made interpretation of the depicted quantities difficult. In the end, we decided to plot the spatial data on the level of hospitals (one point per hospital).
 
 Given the large set of potential variables to facet on (50 states x 106 DRG codes), the interactive plotting `R` library `shiny` was determined to be the appropriate tool for exploration.  
 
@@ -72,7 +72,7 @@ TODO (maybe)
 In addition, we pursued a number of directions in analysis. Our findings are summarized below.
 
 
-In the following plot, we look at the fraction of the bill covered by medicare, facetted by major diagnostic codes and unique combinations of complications and whether the procedure was medical or surgical.
+In the following plot, we look at the fraction of the bill covered by medicare, faceted by major diagnostic codes and unique combinations of complications and whether the procedure was medical or surgical.
 
 The complication classifications are:
 
@@ -162,8 +162,5 @@ Our data has three other numeric columns that we were curious to plot in the sam
 
 # Conclusion
 
-We provide an exploration of the CMS Hopsital Charge Data. A shiny app exploration spatial and temporal relationships among key numeric variables in the data was made. We additionally provide a number of static plots depicting findings of interest.
+We provide an exploration of the CMS Hospital Charge Data. A shiny app exploration spatial and temporal relationships among key numeric variables in the data was made. We additionally provide a number of static plots depicting findings of interest.
 
-TODO
-
-* expand this?
