@@ -164,3 +164,7 @@ Our data has three other numeric columns that we were curious to plot in the sam
 
 We provide an exploration of the CMS Hospital Charge Data. A shiny app exploration spatial and temporal relationships among key numeric variables in the data was made. We additionally provide a number of static plots depicting findings of interest.
 
+
+# Contributions
+
+* PP: wrote intro/summary, prototyped choropleths, contributed to shiny app, engaged in pair EDA
