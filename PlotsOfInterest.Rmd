@@ -153,3 +153,4 @@ We provide an exploration of the CMS Hospital Charge Data. We developed a shiny 
 
 * Phil: wrote intro/summary, prototyped choropleths, contributed to shiny app, engaged in group EDA
 * Erin: initial munging, contributed to shiny app, hosted app on Amazon, group and solo EDA
+* Josh: integrated census data & DRG code breakdown, contributed to shiny app, group and solo EDA
