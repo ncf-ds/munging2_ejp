@@ -3,6 +3,18 @@ title: "Data Munging and EDA"
 output: html_document
 ---
 
+# Introduction
+
+Here we provide an exploratory analysis of the "Hospital Charge Data" (HCD), a USA public dataset on *inpatient* (i.e., admitted to a hospital) medicare provider utilization and payments. The dataset is managed, curated, and hosted by the Centers for Medicare & Medicaid Services (CMS) and can be found [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Provider-Charge-Data/Inpatient.html). At the time of this writing, data are available for fiscal years 2011-2013. 
+
+HCD consists of hospital specific charges for over 3000 U.S. hospital receiving medicare funding  It includes the top 100 most frequently billed discharges paid by Medicare, as classified by the Medicare Severity Diagnosis Related Group (MS-DRG). 
+
+A definition of DRG follows: "A Diagnosis-Related Group (DRG) is a statistical system of classifying any inpatient stay into groups for the purposes of payment. The DRG classification system divides possible diagnoses into more than 20 major body systems and subdivides them into almost 500 groups for the purpose of Medicare reimbursement." [[ref]](https://www.healthlawyers.org/hlresources/Health%20Law%20Wiki/Diagnosis-related%20group%20(DRG).aspx).
+
+In total the 100 DRGs in the data span 7 million discharges or 60% of total Medicare IPPS discharges. 
+
+In summary, this dataset provides information on the expenditure of medicare funding by hospitals on the most frequent procedures. Whereas in general healthcare continues to comprise a significant fraction of the US GPD, and partisian debate over governmental involvement in healthcare continues to rage, having empirical evidence on how funds are actually distributed spent is critical to keeping our opinions grounded in reality.
+
 ```{r, echo = FALSE}
 
   #install.packages("gridExtra")
@@ -12,31 +24,60 @@ output: html_document
 
 ```
 
+# Data Munging
+
+Several modifications to the raw data were made, including the creation of derived variables and enrichment with auxillary datasets (e.g. census).
+We list these modifications below ( See ['munging.Rmd'](munging.html) for a record of steps taken with `R` code ):
+
+* Added a "year" column and joined (with rbind) the data sets for years 2011, 2012 and 2013.
+* Added lat/lon info for each hospital (data from the [Data Science Toolkit API](http://www.inside-r.org/packages/cran/RDSTK/docs/street2coordinates)
+* Added information about the over-65 population in the zip code of the hospital. [Data from the 2010 Census](http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml), by zipcode tabulation areas.
+* Split the drg codes into two columns: code number and code description.
+* Joined information about the "major diagnostic code" that corresponds to each drg code. Data from [here](http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml). This classifies the 106 drg codes into 16 categories.
+
+The first five rows of the final dataset are shown below.
 ```{r, echo = FALSE, cache = TRUE}
 
   top100.dt <- fread("gunzip -c ./data/Top100Procedures.csv.gz")
-
+  head(top100.dt)
 ```
 
-# Setup
 
-The data we're looking at is from [.....] (josh, phil, erin, fill this in). We made the following modifications ( work shown in ['munging.Rmd'](munging.html) ):
+# Exploration I
 
-* We added a "year" column and joined (with rbind) the data sets for years 2011, 2012 and 2013.
-* We added lat/lon info for each hospital (data from the [Data Science Toolkit API](http://www.inside-r.org/packages/cran/RDSTK/docs/street2coordinates)
-* We included information about the over-65 population in the zip code of the hospital. Data from the 2010 Census (http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml), by zipcode tabulation areas.
-* We broke up the drg code into two columns: code number and code description.
-* We joined information about the "major diagnostic code" that corresponds to each drg code. Data from http://factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml. This classifies the 106 drg codes into 16 categories.
+Four numeric variables are given in the raw data (note: they were renamed) and are the primary object of our analysis. They are described below:
 
-# Interactive graphics
+* `num.charges`: "the number of beneficiaries who were released from the inpatient hospital after receiving care."[[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9848)
+* `covered.charges`: (average) (Assumed) The amount charge by the provider. Note that: "the provider has an agreement with Medicare to accept Medicare’s payment and the difference is not paid by Medicare or any other entity, including the beneficiary." [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9264)
+* `total.payments`: (average) "what Medicare actually pays to the provider as well as co-payment and deductible amounts that the beneficiary is responsible for and payments by third parties for coordination of benefits" [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9262)
+* `medicare.payments`: (average) "what the provider bills to Medicare" [[ref]](https://questions.cms.gov/faq.php?id=5005&faqId=9262)
 
-As a group, we were curious about building an app with Shiny. You can see our app [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Or you can run the app locally by loading `shiny/map_app/server.R` into Rstudio.
 
-# Other exploration
+For the first iteration of our exploratory analysis, we were interested to view the spatial trends of these metrics. Choropleths on the state and zip code level were made (see appendix). But the results from the choropleths were found to be lacking. In particular, aggregating hospital data by region (e.g. zip code, state) made interpretation of the depicted quantites difficult. In the end, we decided to plot the spatial data on the level of hospitals (one point per hospital).
+
+Given the large set of potential variables to facet on (50 states x 106 DRG codes), the interactive plotting `R` library `shiny` was determined to be the appropriate tool for exploration.  
+
+Our app provides selectors on state, DRG code, and choice of two numeric variables (Covered Charges, Total Payments, Medicare Payments, # Discharges). These selects define three plots:
+
+* a state map of the two selected variables, where the coordinates of each point correspond the location of the associated hospital, colored by the first and sized by the second.
+* a breakdown by year of the two selected variables.
+* a line chart of the relative rank changes for the two selected variables over the years in the data.
+
+Our app is online (at least, it is, at the time of this writing), and can be found [here](http://ec2-52-88-158-170.us-west-2.compute.amazonaws.com:3838/Top100Medicare/). Alternatively, you can run the app locally by loading `shiny/map_app/server.R` into Rstudio.
+
+TODO (maybe)
+
+* What are examples of interesting findings one can do with the map?
+
+# Other Exploration
+
+In addition, we pursued a number of directions in analysis. Our findings are summarized below.
+
 
 In the following plot, we look at the fraction of the bill covered by medicare, facetted by major diagnostic codes and unique combinations of complications and whether the procedure was medical or surgical.
 
 The complication classifications are:
+
 * None 
 * CC (complications and comorbidities)
 * MCC (major complications and comorbidities)
@@ -97,6 +138,7 @@ So we visualized this in a second way. Here, we do not group by state - only by 
 ```
 
 Our data has three other numeric columns that we were curious to plot in the same way. Again, we group by major diagnostic code and state, and we visualize the sum over the following columns:
+
 * covered charges (the provider's average nominal charge for services)
 * total payments (total amount (average) received by the hospital)
 * medicare payments (amount paid by medicare)
@@ -119,3 +161,11 @@ Our data has three other numeric columns that we were curious to plot in the sam
 
 
 (josh, can you add your new cool plots here?)
+
+# Conclusion
+
+We provide an exploration of the CMS Hopsital Charge Data. A shiny app exploration spatial and temporal relationships among key numeric variables in the data was made. We additionally provide a number of static plots depicting findings of interest.
+
+TODO
+
+* expand this?
